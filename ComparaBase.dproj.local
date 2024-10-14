@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2024/07/23 09:57:49.000.348,=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/07/23 10:11:55.000.613,=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/07/23 10:13:08.000.915,=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/07/24 14:19:24.000.038,=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/08/22 21:19:49.000.061,=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/09/26 13:39:57.000.462,=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/09/26 13:40:29.000.507,E:\Delphi\AppProjetos Pessoais\AppComparaBase\View.Compar.Bases.dfm=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
+    <Transaction>2024/09/26 13:40:29.000.507,E:\Delphi\AppProjetos Pessoais\AppComparaBase\View.Compar.Bases.pas=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/09/26 13:41:05.000.256,C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\ComparaBase.dproj=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2024/09/26 14:09:51.000.039,=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/09/26 14:10:23.000.495,E:\Delphi\AppProjetos Pessoais\AppComparaBase\Model\Model.Compara.pas=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/09/26 14:16:35.000.911,=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/09/26 14:16:56.000.395,E:\Delphi\AppProjetos Pessoais\AppComparaBase\Service\Service.Comparar.pas=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2024/09/26 14:35:39.000.301,E:\Delphi\AppProjetos Pessoais\AppComparaBase\ComparaBase.dproj=C:\Users\eh_ma\OneDrive\Documentos\Embarcadero\Studio\Projects\ComparaBase.dproj</Transaction>
+    <Transaction>2024/09/26 14:44:46.000.434,=E:\Delphi\AppProjetos Pessoais\AppComparaBase\Unit1.pas</Transaction>
+    <Transaction>2024/09/26 14:45:19.000.447,E:\Delphi\AppProjetos Pessoais\AppComparaBase\Controller\Controller.Comparar.pas=E:\Delphi\AppProjetos Pessoais\AppComparaBase\Unit1.pas</Transaction>
+    <Transaction>2024/09/26 16:23:49.000.336,=E:\Delphi\AppProjetos Pessoais\AppComparaBase\Unit1.pas</Transaction>
+    <Transaction>2024/09/26 16:24:42.000.020,E:\Delphi\AppProjetos Pessoais\AppComparaBase\View\View.Processando.dfm=E:\Delphi\AppProjetos Pessoais\AppComparaBase\Unit1.dfm</Transaction>
+    <Transaction>2024/09/26 16:24:42.000.020,E:\Delphi\AppProjetos Pessoais\AppComparaBase\View\View.Processando.pas=E:\Delphi\AppProjetos Pessoais\AppComparaBase\Unit1.pas</Transaction>
+  </Transactions>
+	<ProjectSortOrder AutoSort="0" SortType="0">
+    <File Path="Controller"/>
+    <File Path="Controller\Controller.Comparar.pas"/>
+    <File Path="Model"/>
+    <File Path="Model\Model.Compara.pas"/>
+    <File Path="Service"/>
+    <File Path="Service\Service.Comparar.pas"/>
+    <File Path="View"/>
+    <File Path="View\View.Processando.pas"/>
+    <File Path="View\View.Processando.dfm"/>
+    <File Path="View.Compar.Bases.pas"/>
+    <File Path="View.Compar.Bases.dfm"/>
+  </ProjectSortOrder>
+</BorlandProject>

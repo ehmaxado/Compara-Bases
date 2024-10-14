@@ -1,0 +1,11 @@
+unit Controller.Comparar;
+
+interface
+type tControllerComparar = class
+  private
+  public
+end;
+
+implementation
+
+end.

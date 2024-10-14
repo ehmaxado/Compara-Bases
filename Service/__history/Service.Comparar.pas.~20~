@@ -1,0 +1,153 @@
+unit Service.Comparar;
+
+interface
+
+uses
+  FireDAC.Comp.Client, FireDAC.Stan.Def, FireDAC.Stan.Param, FireDAC.Stan.Intf,
+  FireDAC.Stan.Async, FireDAC.Phys.Intf, FireDAC.DApt, FireDAC.DatS,
+  FireDAC.DApt.Intf, FireDAC.Phys, FireDAC.Phys.IBBase, FireDAC.Phys.FB,
+  FireDAC.VCLUI.Wait, FireDAC.Comp.UI, FireDAC.Phys.FBDef, model.Compara,
+  Vcl.Dialogs, System.SysUtils, System.Classes, System.Generics.Collections,
+  System.Generics.Defaults, View.Processando;
+
+type
+  TServiceComparar = class
+  private
+  public
+    Base1: TFDConnection;
+    Base2: TFDConnection;
+    function ConectarBase(Caminho: string): TFDConnection;
+    function CompararBase(ListaModel: TList<TModelCompara>): Boolean;
+  end;
+
+implementation
+
+{ TServiceComparar }
+
+function TServiceComparar.CompararBase(ListaModel: TList<TModelCompara>): Boolean;
+var
+  TablesList1, TablesList2: TStringList;
+  Query1, Query2: TFDQuery;
+  Model: TModelCompara;
+  i: Integer;
+begin
+  // Verifica se as conexões estão ativas
+  if not (Base1.Connected and Base2.Connected) then
+    raise Exception.Create('Uma ou ambas as bases de dados não estão conectadas.');
+
+  // Cria as listas de tabelas e queries para ambas as bases
+  TablesList1 := TStringList.Create;
+  TablesList2 := TStringList.Create;
+  Query1 := TFDQuery.Create(nil);
+  Query2 := TFDQuery.Create(nil);
+
+  try
+    // Conecta as queries às conexões
+    Query1.Connection := Base1;
+    Query2.Connection := Base2;
+
+    // Obtém as tabelas de ambas as bases
+    Base1.GetTableNames('', '', '', TablesList1);
+    Base2.GetTableNames('', '', '', TablesList2);
+
+    // Percorre as tabelas da Base1
+    for i := 0 to TablesList1.Count - 1 do
+    begin
+      Model := TModelCompara.Create;
+
+      // Nome das tabelas
+      Model.Base1 := TablesList1[i];
+      Model.Base2 := TablesList1[i]; // Assume que as tabelas têm o mesmo nome nas duas bases
+
+      // Conta registros da tabela na Base1
+      Query1.SQL.Text := Format('SELECT COUNT(*) FROM %s', [TablesList1[i]]);
+      Query1.Open;
+      Model.RegistroB1 := Query1.Fields[0].AsInteger;
+
+      // Conta registros da tabela na Base2
+      if TablesList2.IndexOf(TablesList1[i]) <> -1 then
+      begin
+        Query2.SQL.Text := Format('SELECT COUNT(*) FROM %s', [TablesList1[i]]);
+        Query2.Open;
+        Model.RegistroB2 := Query2.Fields[0].AsInteger;
+      end
+      else
+      begin
+        Model.RegistroB2 := 0; // Se a tabela não existir na Base2
+      end;
+
+      // Calcula a diferença de registros
+      Model.Diferenca := Model.RegistroB1 - Model.RegistroB2;
+
+      // Adiciona o modelo à lista
+      ListaModel.Add(Model);
+
+    end;
+
+    // Percorre as tabelas da Base2 para adicionar tabelas que não estão na Base1
+    for i := 0 to TablesList2.Count - 1 do
+    begin
+      if TablesList1.IndexOf(TablesList2[i]) = -1 then
+      begin
+        Model := TModelCompara.Create;
+        Model.Base1 := ''; // Não existe na Base1
+        Model.Base2 := TablesList2[i];
+        Model.RegistroB1 := 0; // Não existe na Base1
+        Query2.SQL.Text := Format('SELECT COUNT(*) FROM %s', [TablesList2[i]]);
+        Query2.Open;
+        Model.RegistroB2 := Query2.Fields[0].AsInteger;
+        Model.Diferenca := -Model.RegistroB2; // Apenas a contagem de Base2
+
+        // Adiciona o modelo à lista
+        ListaModel.Add(Model);
+
+      end;
+    end;
+
+    // Atualiza o ProgressBar para a ordenação
+    Form1.ProgressBar1.Position := Form1.ProgressBar1.Max; // Muda para o máximo para indicar que está ordenando
+
+    // Retorna true após o preenchimento
+    Result := True;
+
+  finally
+    // Libera os recursos
+    TablesList1.Free;
+    TablesList2.Free;
+    Query1.Free;
+    Query2.Free;
+  end;
+end;
+
+
+
+
+
+function TServiceComparar.ConectarBase(Caminho: string): TFDConnection;
+begin
+  Result := TFDConnection.Create(nil);
+  try
+    // Configura os parâmetros da conexão Firebird
+    Result.Params.DriverID := 'FB';
+    Result.Params.Database := Caminho;
+    Result.Params.UserName := 'sysdba';
+    Result.Params.Password := 'masterkey';
+    Result.Params.Add('Protocol=TCPIP');
+
+    Result.Connected := True;
+
+    if Result.Connected then
+      ShowMessage('Conexão estabelecida com sucesso!')
+    else
+      ShowMessage('Falha ao conectar.');
+  except
+    on E: Exception do
+    begin
+      ShowMessage('Erro ao conectar: ' + E.Message);
+      FreeAndNil(Result);
+    end;
+  end;
+end;
+
+end.
+

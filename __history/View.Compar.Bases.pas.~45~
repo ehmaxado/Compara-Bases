@@ -1,0 +1,295 @@
+unit View.Compar.Bases;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids, Controller.Comparar, Model.Compara,
+  System.Generics.Collections, View.Processando, Vcl.Buttons, Vcl.ExtCtrls;
+
+type
+  TViewComparacaoBase = class(TForm)
+    Label1: TLabel;
+    ListaCompara: TStringGrid;
+    EdtBase1: TEdit;
+    EdtBase2: TEdit;
+    BtnBase1: TButton;
+    BtnBase2: TButton;
+    Button1: TButton;
+    Label2: TLabel;
+    Label3: TLabel;
+    Panel1: TPanel;
+    SpeedButton1: TSpeedButton;
+    procedure BtnBase1Click(Sender: TObject);
+    procedure BtnBase2Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure ListaComparaDrawCell(Sender: TObject; ACol, ARow: Integer;
+      Rect: TRect; State: TGridDrawState);
+    procedure FormShow(Sender: TObject);
+    procedure SpeedButton1MouseEnter(Sender: TObject);
+    procedure SpeedButton1MouseLeave(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
+  private
+    ControllerComparar : tControllerComparar;
+    procedure ConfigurarBase1;
+    procedure ConfigurarBase2;
+    procedure CabeçalhoGrid;
+    { Private declarations }
+  public
+    ListaModel: TList<TModelCompara>;
+    { Public declarations }
+  end;
+
+var
+  ViewComparacaoBase: TViewComparacaoBase;
+
+implementation
+
+uses
+  System.Generics.Defaults;
+
+{$R *.dfm}
+
+procedure TViewComparacaoBase.BtnBase1Click(Sender: TObject);
+begin
+  ConfigurarBase1;
+end;
+
+procedure TViewComparacaoBase.BtnBase2Click(Sender: TObject);
+begin
+  ConfigurarBase2;
+end;
+
+procedure TViewComparacaoBase.Button1Click(Sender: TObject);
+var
+  Model: TModelCompara;
+  i: Integer;
+  Form1: TForm1;
+begin
+  Button1.Enabled := False;
+  if (EdtBase1.Text = '') or (EdtBase2.Text = '') then
+  begin
+  ShowMessage('Selecione as bases para comparação.');
+  Button1.Enabled := True;
+  Exit;
+  end;
+
+  // Cria uma instância de Form1 se ainda não existir
+  Form1 := TForm1.Create(nil);
+  try
+    Form1.Show;
+    Application.ProcessMessages; // Permite que a interface do usuário seja atualizada
+    ViewComparacaoBase.Enabled := False;
+    ListaModel.Clear;
+
+    // Chama a função para comparar as bases
+    if ControllerComparar.CompararBases(ListaModel) then
+    begin
+      // Limpa a TStringGrid antes de preencher com novos dados
+      ListaCompara.RowCount := 1;
+      CabeçalhoGrid;
+
+      // Percorre a lista de modelos e preenche a TStringGrid
+    ListaModel.Sort(
+    TComparer<TModelCompara>.Construct(
+    function(const Left, Right: TModelCompara): Integer
+    begin
+      // Ordena do maior para o menor pela diferença
+      Result := Right.Diferenca - Left.Diferenca; // Troca para 'Right - Left' para ordem decrescente
+    end
+     )
+    );
+    // Agora, percorre a lista de modelos e preenche a TStringGrid
+    for i := 0 to ListaModel.Count - 1 do
+    begin
+      Model := ListaModel[i];
+      ListaCompara.RowCount := ListaCompara.RowCount + 1; // Adiciona uma nova linha
+      ListaCompara.Cells[0, i + 1] := Model.Base1;
+      ListaCompara.Cells[1, i + 1] := IntToStr(Model.RegistroB1);
+      ListaCompara.Cells[2, i + 1] := Model.Base2;
+      ListaCompara.Cells[3, i + 1] := IntToStr(Model.RegistroB2);
+      ListaCompara.Cells[4, i + 1] := IntToStr(Model.Diferenca);
+    end;
+      Form1.Close;
+    end
+    else
+    begin
+      ShowMessage('As bases de dados não foram comparadas corretamente.');
+    end;
+
+  finally
+    ViewComparacaoBase.Enabled := True;
+    Button1.Enabled := True;
+    Form1.Free; // Libera o Form1 após o uso
+  end;
+end;
+
+
+
+procedure TViewComparacaoBase.ConfigurarBase1;
+begin
+  with TOpenDialog.Create(nil) do
+    try
+      Options := [ofFileMustExist];
+      Filter := 'Firebird Database Files (*.fdb)|*.fdb';
+      InitialDir := ExtractFilePath(ParamStr(0));
+      if Execute then
+      begin
+        EdtBase1.Text := FileName;
+        ControllerComparar.ConectarBase1(FileName);
+      end;
+    finally
+      Free;
+    end;
+end;
+
+procedure TViewComparacaoBase.ConfigurarBase2;
+begin
+  with TOpenDialog.Create(nil) do
+    try
+      Options := [ofFileMustExist];
+      Filter := 'Firebird Database Files (*.fdb)|*.fdb';
+      InitialDir := ExtractFilePath(ParamStr(0));
+      if Execute then
+      begin
+        EdtBase2.Text := FileName;
+        ControllerComparar.ConectarBase2(FileName);
+      end;
+    finally
+      Free;
+    end;
+end;
+
+procedure TViewComparacaoBase.CabeçalhoGrid;
+begin
+  // Define os cabeçalhos da TStringGrid
+  ListaCompara.Cells[0, 0] := 'Tabela base 1';
+  ListaCompara.ColWidths[0] := 250;
+  ListaCompara.Cells[1, 0] := 'Registros Base 1';
+  ListaCompara.ColWidths[1] := 100;
+  ListaCompara.Cells[2, 0] := 'Tabela base 2';
+  ListaCompara.ColWidths[2] := 250;
+  ListaCompara.Cells[3, 0] := 'Registros Base 2';
+  ListaCompara.ColWidths[3] := 100;
+  ListaCompara.Cells[4, 0] := 'Diferença';
+  ListaCompara.ColWidths[4] := 75;
+end;
+
+procedure TViewComparacaoBase.FormCreate(Sender: TObject);
+begin
+  ControllerComparar := tControllerComparar.Create;
+  ListaModel:= TList<TModelCompara>.Create;
+  Panel1.Color := RGB(245, 130, 32);
+end;
+
+procedure TViewComparacaoBase.FormDestroy(Sender: TObject);
+begin
+ControllerComparar.Free;
+ListaModel.Free;
+end;
+
+procedure TViewComparacaoBase.FormShow(Sender: TObject);
+begin
+CabeçalhoGrid;
+end;
+
+procedure TViewComparacaoBase.ListaComparaDrawCell(Sender: TObject; ACol,
+  ARow: Integer; Rect: TRect; State: TGridDrawState);
+begin
+  with ListaCompara.Canvas do
+  begin
+    if ARow = 0 then
+    begin
+    Brush.Color := clSilver;
+    Font.Color := clBlack;
+    end;
+
+
+    FillRect(Rect);
+    TextRect(Rect, Rect.Left + 2, Rect.Top + 2, ListaCompara.Cells[ACol, ARow]);
+
+  end;
+
+end;
+
+
+
+procedure TViewComparacaoBase.SpeedButton1Click(Sender: TObject);
+var
+  Model: TModelCompara;
+  i: Integer;
+  Form1: TForm1;
+begin
+  SpeedButton1.Enabled := False;
+  if (EdtBase1.Text = '') or (EdtBase2.Text = '') then
+  begin
+  ShowMessage('Selecione as bases para comparação.');
+  SpeedButton1.Enabled := True;
+  Exit;
+  end;
+
+  // Cria uma instância de Form1 se ainda não existir
+  Form1 := TForm1.Create(nil);
+  try
+    Form1.Show;
+    Application.ProcessMessages; // Permite que a interface do usuário seja atualizada
+    ViewComparacaoBase.Enabled := False;
+    ListaModel.Clear;
+
+    // Chama a função para comparar as bases
+    if ControllerComparar.CompararBases(ListaModel) then
+    begin
+      // Limpa a TStringGrid antes de preencher com novos dados
+      ListaCompara.RowCount := 1;
+      CabeçalhoGrid;
+
+      // Percorre a lista de modelos e preenche a TStringGrid
+    ListaModel.Sort(
+    TComparer<TModelCompara>.Construct(
+    function(const Left, Right: TModelCompara): Integer
+    begin
+      // Ordena do maior para o menor pela diferença
+      Result := Right.Diferenca - Left.Diferenca; // Troca para 'Right - Left' para ordem decrescente
+    end
+     )
+    );
+    // Agora, percorre a lista de modelos e preenche a TStringGrid
+    for i := 0 to ListaModel.Count - 1 do
+    begin
+      Model := ListaModel[i];
+      ListaCompara.RowCount := ListaCompara.RowCount + 1; // Adiciona uma nova linha
+      ListaCompara.Cells[0, i + 1] := Model.Base1;
+      ListaCompara.Cells[1, i + 1] := IntToStr(Model.RegistroB1);
+      ListaCompara.Cells[2, i + 1] := Model.Base2;
+      ListaCompara.Cells[3, i + 1] := IntToStr(Model.RegistroB2);
+      ListaCompara.Cells[4, i + 1] := IntToStr(Model.Diferenca);
+    end;
+      Form1.Close;
+    end
+    else
+    begin
+      ShowMessage('As bases de dados não foram comparadas corretamente.');
+    end;
+
+  finally
+    ViewComparacaoBase.Enabled := True;
+    SpeedButton1.Enabled := True;
+    Form1.Free; // Libera o Form1 após o uso
+  end;
+end;
+
+procedure TViewComparacaoBase.SpeedButton1MouseEnter(Sender: TObject);
+begin
+  //SpeedButton1.Visible := False;
+  Panel1.Color := RGB(196, 90, 32);
+end;
+
+procedure TViewComparacaoBase.SpeedButton1MouseLeave(Sender: TObject);
+begin
+  SpeedButton1.Visible := true;
+  Panel1.Color := RGB(245, 130, 32);
+end;
+
+end.

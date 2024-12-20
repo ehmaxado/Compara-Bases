@@ -8,7 +8,7 @@ uses
   FireDAC.DApt.Intf, FireDAC.Phys, FireDAC.Phys.IBBase, FireDAC.Phys.FB,
   FireDAC.VCLUI.Wait, FireDAC.Comp.UI, FireDAC.Phys.FBDef, model.Compara,
   Vcl.Dialogs, System.SysUtils, System.Classes, System.Generics.Collections,
-  System.Generics.Defaults, View.Processando;
+  System.Generics.Defaults, View.Processando, Forms;
 
 type
   TServiceComparar = class
@@ -17,14 +17,14 @@ type
     Base1: TFDConnection;
     Base2: TFDConnection;
     function ConectarBase(Caminho: string): TFDConnection;
-    function CompararBase(ListaModel: TList<TModelCompara>): Boolean;
+    function CompararBase(ListaModel: TList<TModelCompara>; Comparar: TForm1): Boolean;
   end;
 
 implementation
 
 { TServiceComparar }
 
-function TServiceComparar.CompararBase(ListaModel: TList<TModelCompara>): Boolean;
+function TServiceComparar.CompararBase(ListaModel: TList<TModelCompara>; Comparar: TForm1): Boolean;
 var
   TablesList1, TablesList2: TStringList;
   Query1, Query2: TFDQuery;
@@ -40,7 +40,6 @@ begin
   TablesList2 := TStringList.Create;
   Query1 := TFDQuery.Create(nil);
   Query2 := TFDQuery.Create(nil);
-
   try
     // Conecta as queries às conexões
     Query1.Connection := Base1;
@@ -51,6 +50,7 @@ begin
     Base2.GetTableNames('', '', '', TablesList2);
 
     // Percorre as tabelas da Base1
+    Comparar.ProgressBar.Max := TablesList1.Count;
     for i := 0 to TablesList1.Count - 1 do
     begin
       Model := TModelCompara.Create;
@@ -58,6 +58,9 @@ begin
       // Nome das tabelas
       Model.Base1 := TablesList1[i];
       Model.Base2 := TablesList1[i]; // Assume que as tabelas têm o mesmo nome nas duas bases
+      if Copy(TablesList1[i], 1, 2) <> 'VW' then
+      begin
+
 
       // Conta registros da tabela na Base1
       Query1.SQL.Text := Format('SELECT COUNT(*) FROM %s', [TablesList1[i]]);
@@ -77,11 +80,16 @@ begin
       end;
 
       // Calcula a diferença de registros
-      Model.Diferenca := Model.RegistroB1 - Model.RegistroB2;
+      Model.Diferenca := Abs(Model.RegistroB1 - Model.RegistroB2);
 
       // Adiciona o modelo à lista
       ListaModel.Add(Model);
 
+      // Atualiza os labels e a barra de progresso
+      Comparar.LbTabela.Caption := TablesList1[i];
+      Comparar.ProgressBar.Position := i + 1;
+      Application.ProcessMessages; // Atualiza a interface gráfica a cada iteração
+      end;
     end;
 
     // Percorre as tabelas da Base2 para adicionar tabelas que não estão na Base1
@@ -100,7 +108,6 @@ begin
 
         // Adiciona o modelo à lista
         ListaModel.Add(Model);
-
       end;
     end;
 
@@ -115,6 +122,7 @@ begin
     Query2.Free;
   end;
 end;
+
 
 
 

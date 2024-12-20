@@ -135,9 +135,10 @@ begin
     // Configura os parâmetros da conexão Firebird
     Result.Params.DriverID := 'FB';
     Result.Params.Database := Caminho;
-    Result.Params.UserName := 'sysdba';
+    Result.Params.UserName := 'SYSDBA';
     Result.Params.Password := 'masterkey';
     Result.Params.Add('Protocol=TCPIP');
+    Result.Params.Add('Port=3050');
 
     Result.Connected := True;
 
